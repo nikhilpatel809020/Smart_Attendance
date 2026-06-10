@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+Attendance.csv
+students.csv
+Captured/
+Unknown/
