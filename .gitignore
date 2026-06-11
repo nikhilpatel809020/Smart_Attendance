@@ -1,7 +1,10 @@
 venv/
 __pycache__/
 *.pyc
-Attendance.csv
-students.csv
+
+Images/
 Captured/
 Unknown/
+
+Attendance.csv
+students.csv
