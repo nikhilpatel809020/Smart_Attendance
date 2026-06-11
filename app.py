@@ -1,12 +1,10 @@
 import streamlit as st
-import cv2
 import os
 import pandas as pd
 from datetime import datetime
 
-st.set_page_config(page_title="Smart Attendance System", layout="centered")
+st.set_page_config(page_title="Smart Attendance System")
 
-# ---------------- FOLDERS SETUP ----------------
 if not os.path.exists("Images"):
     os.makedirs("Images")
 
@@ -18,75 +16,70 @@ if not os.path.exists("Attendance.csv"):
     with open("Attendance.csv", "w") as f:
         f.write("Roll,Date,Time\n")
 
-# ---------------- TITLE ----------------
 st.title("📚 Smart Attendance System")
 
 menu = st.sidebar.selectbox(
-    "Select Menu",
+    "Menu",
     ["New Registration", "Mark Attendance", "View Attendance"]
 )
 
-# ---------------- NEW REGISTRATION ----------------
 if menu == "New Registration":
 
-    st.subheader("Register New Student")
+    st.subheader("Register Student")
 
-    name = st.text_input("Enter Name")
-    roll = st.text_input("Enter Roll No")
+    name = st.text_input("Student Name")
+    roll = st.text_input("Roll Number")
 
-    if st.button("📸 Capture Face"):
+    uploaded_file = st.file_uploader(
+        "Upload Student Photo",
+        type=["jpg", "jpeg", "png"]
+    )
 
-        if name == "" or roll == "":
-            st.error("Please fill all fields")
+    if st.button("Register Student"):
+
+        if not name or not roll:
+            st.error("Enter Name and Roll Number")
+
+        elif uploaded_file is None:
+            st.error("Upload Student Photo")
+
         else:
-            cam = cv2.VideoCapture(0)
 
-            st.info("Press SPACE to capture image")
-
-            while True:
-                ret, frame = cam.read()
-                cv2.imshow("Capture Face", frame)
-
-                k = cv2.waitKey(1)
-
-                if k == 32:
-                    cv2.imwrite(f"Images/{roll}.jpg", frame)
-                    break
-
-            cam.release()
-            cv2.destroyAllWindows()
+            with open(f"Images/{roll}.jpg", "wb") as f:
+                f.write(uploaded_file.getbuffer())
 
             with open("students.csv", "a") as f:
                 f.write(f"{roll},{name}\n")
 
             st.success("Student Registered Successfully")
 
-# ---------------- MARK ATTENDANCE ----------------
-if menu == "Mark Attendance":
+elif menu == "Mark Attendance":
 
     st.subheader("Mark Attendance")
 
-    roll = st.text_input("Enter Roll No")
+    roll = st.text_input("Enter Roll Number")
 
     if st.button("Mark Present"):
 
-        if roll == "":
+        if not roll:
             st.error("Enter Roll Number")
+
         else:
             now = datetime.now()
 
             with open("Attendance.csv", "a") as f:
-                f.write(f"{roll},{now.date()},{now.time()}\n")
+                f.write(
+                    f"{roll},{now.date()},{now.strftime('%H:%M:%S')}\n"
+                )
 
-            st.success(f"Attendance Marked for Roll {roll}")
+            st.success("Attendance Marked Successfully")
 
-# ---------------- VIEW ATTENDANCE ----------------
-if menu == "View Attendance":
+elif menu == "View Attendance":
 
     st.subheader("Attendance Records")
 
-    if os.path.exists("Attendance.csv"):
+    try:
         df = pd.read_csv("Attendance.csv")
         st.dataframe(df)
-    else:
-        st.warning("No data found")
+    except:
+        st.warning("No Attendance Records Found")
