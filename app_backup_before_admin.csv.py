@@ -8,6 +8,8 @@ import tempfile
 import time
 
 st.set_page_config(page_title="Smart Attendance System")
+ADMIN_USER ="admin"
+ADMIN_PASSWORD = "12345"
 
 # Create folders/files
 os.makedirs("Images", exist_ok=True)
@@ -64,16 +66,7 @@ def already_marked(roll):
     except Exception:
         return False
 
-col1, col2, col3 = st.columns(
-    [1, 2, 1]
-)
 
-with col2:
-
-    st.image(
-        "Assets/download.png",
-        width=180
-    )
 st.title("📚 Smart Attendance System")
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -86,10 +79,8 @@ if st.session_state.logged_in:
             "New Registration",
             "Face Attendance",
             "View Attendance",
-            "Change Password",
             "Logout"
         ]
-                  
     )
 
 else:
@@ -101,10 +92,9 @@ else:
             "Admin Login"
         ]
     )
+    if menu == "Admin Login":
 
-if menu == "Admin Login":
-
-    st.subheader("Admin Login")
+       st.subheader("Admin Login")
 
     username = st.text_input(
         "Username"
@@ -117,44 +107,24 @@ if menu == "Admin Login":
 
     if st.button("Login"):
 
-        try:
+        if (
+            username == ADMIN_USER
+            and
+            password == ADMIN_PASSWORD
+        ):
 
-            admin_df = pd.read_csv(
-                "admin.csv"
+            st.session_state.logged_in = True
+
+            st.success(
+                "Login Successful"
             )
 
-            row = admin_df[
-                (
-                    admin_df["Username"]
-                    == username
-                )
-                &
-                (
-                    admin_df["Password"]
-                    == password
-                )
-            ]
+            st.rerun()
 
-            if len(row) > 0:
-
-                st.session_state.logged_in = True
-
-                st.success(
-                    "Login Successful"
-                )
-
-                st.rerun()
-
-            else:
-
-                st.error(
-                    "Invalid Username or Password"
-                )
-
-        except Exception:
+        else:
 
             st.error(
-                "admin.csv not found"
+                "Invalid Username or Password"
             )
 
 # ---------------- REGISTER ----------------
@@ -483,85 +453,6 @@ elif menu == "View Attendance":
         st.warning(
             "No Attendance Records Found"
         )
-elif menu == "Change Password":
-
-    st.subheader(
-        "Change Password"
-    )
-
-    old_password = st.text_input(
-        "Old Password",
-        type="password"
-    )
-
-    new_password = st.text_input(
-        "New Password",
-        type="password"
-    )
-
-    confirm_password = st.text_input(
-        "Confirm Password",
-        type="password"
-    )
-
-    if st.button(
-        "Update Password"
-    ):
-
-        try:
-
-            admin_df = pd.read_csv(
-                "admin.csv"
-            )
-
-            current_password = (
-                admin_df.loc[
-                    0,
-                    "Password"
-                ]
-            )
-
-            if (
-                old_password
-                !=
-                current_password
-            ):
-
-                st.error(
-                    "Old Password Incorrect"
-                )
-
-            elif (
-                new_password
-                !=
-                confirm_password
-            ):
-
-                st.error(
-                    "Passwords Do Not Match"
-                )
-
-            else:
-
-                admin_df.loc[
-                    0,
-                    "Password"
-                ] = new_password
-
-                admin_df.to_csv(
-                    "admin.csv",
-                    index=False
-                )
-
-                st.success(
-                    "Password Updated Successfully"
-                )
-
-        except Exception:
-
-            st.error(
-                "admin.csv not found"
-            )
 elif menu == "Logout":
 
     st.session_state.logged_in = False
