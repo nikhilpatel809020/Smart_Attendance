@@ -3,4 +3,4 @@ pandas
 opencv-python-headless
 pillow
 numpy
-face_recognition
+face-recognition
